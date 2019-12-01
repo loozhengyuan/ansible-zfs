@@ -1,2 +1,59 @@
 ---
-# tasks file for zfs
+- name: Setup buster-backports distribution
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    filename: buster-backports
+  loop:
+    - deb http://deb.debian.org/debian buster-backports main contrib
+    - deb-src http://deb.debian.org/debian buster-backports main contrib
+  notify: apt_update
+
+- name: Copy apt preferences file
+  template:
+    src: 90zfs.j2
+    dest: /etc/apt/preferences.d/90zfs
+    mode: '0644'
+    backup: yes
+  notify: apt_update
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+
+- name: Install kernel headers
+  apt:
+    name: "{{ packages }}"
+    state: present
+    force_apt_get: yes
+  vars:
+    packages:
+    - linux-headers-amd64
+    - linux-image-amd64
+
+- name: Install DKMS
+  apt:
+    name: dkms
+    state: present
+    default_release: buster-backports
+    force_apt_get: yes
+
+# Installs minimum zfs-dkms files to run modprobe command
+- name: Install ZFS-DKMS
+  apt:
+    name: zfs-dkms
+    state: present
+    default_release: buster-backports
+    force_apt_get: yes
+    install_recommends: no
+
+- name: Load ZFS module
+  modprobe:
+    name: zfs
+    state: present
+
+- name: Install ZFS
+  apt:
+    name: zfsutils-linux
+    state: present
+    default_release: buster-backports
+    force_apt_get: yes
