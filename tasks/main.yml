@@ -20,6 +20,16 @@
 - name: Force all notified handlers to run at this point, not waiting for normal sync points
   meta: flush_handlers
 
+# The `ansible_facts['architecture']` variable works in most cases, but
+# reports `amd64` as `x86_64`, which is not desired in this case.
+# The `ansible_facts['kernel']` variable is also a good alternative, but
+# is not as portable as just using the architecture variable.
+# The following is a workaround that only works in Debian-based
+# operating systems.
+- name: Get architecture
+  shell: dpkg --print-architecture
+  register: dpkg_architecture
+
 - name: Install kernel headers
   apt:
     name: "{{ packages }}"
@@ -27,8 +37,8 @@
     force_apt_get: yes
   vars:
     packages:
-    - "linux-headers-{{ ansible_facts['kernel'] }}"
-    - "linux-image-{{ ansible_facts['kernel'] }}"
+    - "linux-headers-{{ dpkg_architecture.stdout }}"
+    - "linux-image-{{ dpkg_architecture.stdout }}"
 
 - name: Install other dependencies
   apt:
