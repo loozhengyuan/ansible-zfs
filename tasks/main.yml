@@ -31,8 +31,8 @@
     force_apt_get: yes
   vars:
     packages:
-    - "linux-headers-amd64"
-    - "linux-image-amd64"
+    - linux-headers-amd64
+    - linux-image-amd64
 
 - name: Ensure all other dependencies are installed
   apt:
@@ -70,8 +70,13 @@
 
 # It is not known why this service may sometimes be left unenabled, but
 # it is required to ensure that zpools are always mounted at boot time.
+# Requires `systemctl daemon-reload` but systemd does not seem to be
+# well-supported in molecule + docker setups. Accordingly, all CI tests
+# shall omit this step or migrate to use molecule + vagrant setup.
 - name: Ensure zfs-import-scan is started and enabled
   service:
     name: zfs-import-scan
     state: started
     enabled: yes
+  tags:
+    - molecule-notest
