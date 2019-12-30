@@ -68,10 +68,10 @@
     default_release: "{{ ansible_facts['distribution_release'] }}-backports"
     force_apt_get: yes
 
-# # It is not known why this service may sometimes be left unenabled, but
-# # it is required to ensure that zpools are always mounted at boot time.
-# - name: Ensure zfs-import-scan.service is started and enabled
-#   service:
-#     name: zfs-import-scan.service
-#     state: started
-#     enabled: yes
+# It is not known why this service may sometimes be left unenabled, but
+# it is required to ensure that zpools are always mounted at boot time.
+- name: Ensure zfs-import-scan is started and enabled
+  service:
+    name: zfs-import-scan
+    state: started
+    enabled: yes
