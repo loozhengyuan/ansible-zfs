@@ -1,5 +1,5 @@
 ---
-- name: "Setup {{ ansible_facts['distribution_release'] }}-backports distribution"
+- name: Ensure backports are loaded
   apt_repository:
     repo: "{{ item }}"
     state: present
@@ -9,7 +9,7 @@
     - "deb-src http://deb.debian.org/debian {{ ansible_facts['distribution_release'] }}-backports main contrib"
   notify: apt_update
 
-- name: Copy apt preferences file
+- name: Ensure apt preferences for zfs packages are loaded
   template:
     src: 90zfs.j2
     dest: /etc/apt/preferences.d/90zfs
@@ -24,7 +24,7 @@
 # reports `amd64` as `x86_64`, which is not desired in this case.
 # The `ansible_facts['kernel']` variable is also a good alternative, but
 # is not as portable as just using the architecture variable.
-- name: Install kernel headers
+- name: Ensure kernel headers are installed
   apt:
     name: "{{ packages }}"
     state: present
@@ -34,13 +34,13 @@
     - "linux-headers-amd64"
     - "linux-image-amd64"
 
-- name: Install other dependencies
+- name: Ensure all other dependencies are installed
   apt:
     name: dpkg-dev
     state: present
     force_apt_get: yes
 
-- name: Install DKMS
+- name: Ensure dkms is installed
   apt:
     name: dkms
     state: present
@@ -48,7 +48,7 @@
     force_apt_get: yes
 
 # Installs minimum zfs-dkms files to run modprobe command
-- name: Install ZFS-DKMS
+- name: Ensure zfs-dkms is installed before loading zfs module
   apt:
     name: zfs-dkms
     state: present
@@ -56,12 +56,12 @@
     force_apt_get: yes
     install_recommends: no
 
-- name: Load ZFS module
+- name: Ensure zfs module is loaded
   modprobe:
     name: zfs
     state: present
 
-- name: Install ZFS
+- name: Ensure zfsutils-linux is installed
   apt:
     name: zfsutils-linux
     state: present
