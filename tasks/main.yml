@@ -30,6 +30,12 @@
     - linux-headers-amd64
     - linux-image-amd64
 
+- name: Install other dependencies
+  apt:
+    name: dpkg-dev
+    state: present
+    force_apt_get: yes
+
 - name: Install DKMS
   apt:
     name: dkms
