@@ -1,12 +1,12 @@
 ---
-- name: Setup buster-backports distribution
+- name: "Setup {{ ansible_facts['distribution_release'] }}-backports distribution"
   apt_repository:
     repo: "{{ item }}"
     state: present
-    filename: buster-backports
+    filename: "{{ ansible_facts['distribution_release'] }}-backports"
   loop:
-    - deb http://deb.debian.org/debian buster-backports main contrib
-    - deb-src http://deb.debian.org/debian buster-backports main contrib
+    - "deb http://deb.debian.org/debian {{ ansible_facts['distribution_release'] }}-backports main contrib"
+    - "deb-src http://deb.debian.org/debian {{ ansible_facts['distribution_release'] }}-backports main contrib"
   notify: apt_update
 
 - name: Copy apt preferences file
@@ -27,8 +27,8 @@
     force_apt_get: yes
   vars:
     packages:
-    - linux-headers-amd64
-    - linux-image-amd64
+    - "linux-headers-{{ ansible_facts['kernel'] }}"
+    - "linux-image-{{ ansible_facts['kernel'] }}"
 
 - name: Install other dependencies
   apt:
@@ -40,7 +40,7 @@
   apt:
     name: dkms
     state: present
-    default_release: buster-backports
+    default_release: "{{ ansible_facts['distribution_release'] }}-backports"
     force_apt_get: yes
 
 # Installs minimum zfs-dkms files to run modprobe command
@@ -48,7 +48,7 @@
   apt:
     name: zfs-dkms
     state: present
-    default_release: buster-backports
+    default_release: "{{ ansible_facts['distribution_release'] }}-backports"
     force_apt_get: yes
     install_recommends: no
 
@@ -61,5 +61,5 @@
   apt:
     name: zfsutils-linux
     state: present
-    default_release: buster-backports
+    default_release: "{{ ansible_facts['distribution_release'] }}-backports"
     force_apt_get: yes
